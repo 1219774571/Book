@@ -1,14 +1,12 @@
-## SCTP套接字选项
-
-----
+# SCTP套接字选项
 
 数目相对较多的SCTP套接字选项反映除SCTP为应用程序开发人员一个了较细粒度的控制能力。它们的级别（即getsockopt和setsockopt函数的第二个参数）为**IPPROTO_SCTP**
 
-#### SCTO_ADAPTION_LAYER
+## SCTO_ADAPTION_LAYER
 
 本选项允许调用者获取或设置将由本端提供给对端的适配层指示
 
-#### SCTP_ASSOCINFO
+### SCTP_ASSOCINFO
 
 本套接字选项可用于以下三个目的地：
 
@@ -16,7 +14,7 @@
 > 2. 改变某个已有关联的参数
 > 3. 为未来的关联设置默认信息
 
-#### SCTP_AUTOCLOSE 
+#### SCTP_AUTOCLOSE
 
 本套接字允许我们获取或设置一个SCTP端点的自动关闭时间
 
@@ -89,4 +87,3 @@ SCTP状态
 | SCTP_SHUTDOWN_SENT     | 关联已发送SHUTDOWN          |
 | SCTP_SHUTDOWN_RECEIVED | 关联已收到SHUTDOWN          |
 | SCTP_SHUDOWN_ACK_SENT  | 关联在等待SHUTDOWN-COMPLETE |
-
