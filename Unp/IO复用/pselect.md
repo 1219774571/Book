@@ -1,4 +1,4 @@
-## pselect函数
+# pselect函数
 
 pselect函数是由POSIX发明的
 
@@ -9,8 +9,8 @@ pselect函数是由POSIX发明的
 int pselect(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset, const struct timespec *timeout, const sigset_t *sigmask);
 返回：若有就绪描述符则为其数目，若超时为0，出错为-1;
 struct timespec{
-    time_t tv_sec;	//秒
-    long tv_nsec;	//纳秒
+    time_t tv_sec;   //秒
+    long tv_nsec;    //纳秒
 };
 ```
 

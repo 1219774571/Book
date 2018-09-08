@@ -1,11 +1,11 @@
-## select函数
+# select函数
 
 该函数允许进程指示内核等待多个事件中的任何一个发生，并只在有一个或多个事件发生或经历一段指定的时间后才唤醒它
 
 ```c
 #include <sys/select.h>
 #include <sys/time.h>
-int select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset, const struct timeval *timeout);	//返回：若有就绪描述符则为其数目，若超时则0，出错为-1
+int select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset, const struct timeval *timeout); //返回：若有就绪描述符则为其数目，若超时则0，出错为-1
 ```
 
 > __timeout参数__告知内核等待所指定描述符中的任何一个就绪可花多长时间
@@ -18,8 +18,8 @@ int select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset, co
 
 ```c
 struct timeval{
-    long tv_sec;	//秒
-    long tv_usec;	//微秒
+    long tv_sec;    //秒
+    long tv_usec;   //微秒
 }
 ```
 
@@ -43,7 +43,7 @@ int FD_ISSET(int fd, fd_set *fdset);
 >
 > 注：描述符是用**0开始**的
 
-### 描述符就绪条件
+## 描述符就绪条件
 
 ------
 
@@ -60,4 +60,3 @@ int FD_ISSET(int fd, fd_set *fdset);
 > - 该连接的写半部关闭，执行写操作产生SIGPIPE信号
 > - 使用非阻塞式connect的套接字已建立连接，或者connect已经以失败告终
 > - 其上有一个套接字错误待处理，这样的套接字写操作将不阻塞并返回-1，同时把errno设置成确切的错误条件
-

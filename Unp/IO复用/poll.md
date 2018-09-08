@@ -1,4 +1,4 @@
-## poll函数
+# poll函数
 
 poll提供的功能与select类似，不过在处理流设备时，它能够提供额外的信息
 
@@ -24,9 +24,9 @@ events标志和revents标志的常值
 |  POLLOUT   | √ | √ | 普通数据可写 |
 | POLLWRNORM | √ | √ | 普通数据可写 |
 | POLLWRBAND | √ | √ | 优先级带数据可写 |
-|  POLLERR   |                    | √ | 发生错误 |
-|  POLLHUP   |                    | √ | 发生挂起 |
-| POLLNVAL 	  |		| √ | 描述符不是一个打开的文件 |
+|  POLLERR   |   | √ | 发生错误 |
+|  POLLHUP   |   | √ | 发生挂起 |
+| POLLNVAL   |   | √ | 描述符不是一个打开的文件 |
 
 poll设备三类数据：普通、优先级带、和高优先级
 
@@ -48,4 +48,3 @@ timeout参数指定poll函数返回前等待多长时间
 |  INFTIM   |       永远等待       |
 |     0     | 立刻返回，不阻塞进程 |
 |    > 0    | 等待指定数据的毫秒数 |
-
