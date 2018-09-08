@@ -20,8 +20,8 @@ SCTP是__面向消息__的，提供多个流，不阻塞同一关联其他流的
 
 > 该发送端的IP地址清单、初始序列号、用于标识本关联中所有分组的初始标记、发送端请求的外出流的数据以及发送端能够支持的外来流的数目
 
-![SCTP状态转换图](/home/coffee/Book/Unp/传输层/img/SCTP状态转换图.jpg)
+![SCTP状态转换图](./img/SCTP状态转换图.jpg)
 
-分组交换
+### 分组交换
 
-![SCTP分组交换](/home/coffee/Book/Unp/传输层/img/SCTP分组交换图.jpg )
+![SCTP分组交换](./img/SCTP分组交换图.jpg )

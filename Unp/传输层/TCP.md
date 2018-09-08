@@ -59,4 +59,4 @@
 
 ### TCP状态转换图
 
-![TCP状态转换图](/home/coffee/Book/Unp/传输层/img/TCP状态转换图.jpg)
+![TCP状态转换图](./img/TCP状态转换图.jpg)
