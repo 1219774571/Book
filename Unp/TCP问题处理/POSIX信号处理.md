@@ -1,6 +1,4 @@
-## POSIX信号处理
-
------
+# POSIX信号处理
 
 信号就是告知某个进程发生了某个事件的通知，也称软件中断。
 
@@ -15,7 +13,7 @@
 > 2. 我们可以把某个信号的处置决定为SIG_IGN来**忽略**它，__SIGKILL__和__SIGSTOP__信号是不能忽略的
 > 3. 我们可以把某个信号的处置决定为SIG_DFL来启用它的默认处置
 
-#### signal函数
+## signal函数
 
 ```c
 #include <signal.h>
@@ -49,7 +47,7 @@ int sigaction(int sig, const struct sigaction *restrict act, struct sigaction *r
 ```c
 #include <sys/wait.h>
 pid_t wait(int *statloc);
-pid_t waitpid(pid_t pid, int *statloc, int options);	//均返回：成功则进程ID,出错则0或-1
+pid_t waitpid(pid_t pid, int *statloc, int options); //均返回：成功则进程ID,出错则0或-1
 ```
 
 网络编程可能会遇到三种情况
