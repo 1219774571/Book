@@ -1,16 +1,16 @@
-### TCP是一个复杂、可靠的字节流协议
+# TCP是一个复杂、可靠的字节流协议
 
->  面向连接的协议，它提供可靠的全双工__字节流__，关心确认、超时、重传之类的细节
+> 面向连接的协议，它提供可靠的全双工__字节流__，关心确认、超时、重传之类的细节
 
-#### TCP提供流量控制
+## TCP提供流量控制
 
->  TCP总是告知对端在任何时刻它一次能够从对端接受多少直接的数据，称**通告窗口**
+> TCP总是告知对端在任何时刻它一次能够从对端接受多少直接的数据，称**通告窗口**
 
 ## TCP连接的建立和终止
 
 --------------
 
-#### 三路握手
+### 三路握手
 
 > 1. 服务器准备接受外来的连接，通常通过调用socket、bind和listen完成__被动打开__状态
 > 2. 客户端调用connect发起__主动打开__，客户TCP发送SYN（同步）分节，告诉服务器客户发送的数据的*初始序列号*
@@ -19,15 +19,12 @@
 
 #### 解析三路握手
 
-> 	客户											服务器
->
-> socket										socket，bind，listen（被动打开）LISTEN
->	
-> connect（阻塞）主动打开SYN_SENT	__SYN j	->↓__	accept（阻塞）
->	
-> ESTABLISHED		__<-	SYN K， ACK j+1__		SYN_RCVD
->	
-> connect返回			__ACK K+1	->__			ESTABLISHED accept返回read（阻塞）
+|客户   |        | 服务器|
+| :----:| :----:| :-----:|
+|socket||socket，bind，listen（被动打开）LISTEN|
+| connect（阻塞）主动打开SYN_SENT|__SYN j  ->↓__  |accept（阻塞）|
+|ESTABLISHED|__<- SYN K， ACK j+1__ |SYN_RCVD|
+|connect返回|__ACK K+1  ->__|ESTABLISHED accept返回read（阻塞）|
 
 高带宽或长延迟的网络称为“长胖管道”
 
@@ -44,28 +41,22 @@
 
 #### TCP连接关闭时的分组交换
 
-> 客户									服务器
->
-> close FIN_WAIT_1主动关闭	__FIN M   ->__	CLOSE_WAIT被动关闭 
->
-> FIN_WAIT_2			__<- ACK M+1__		read返回0  __↑__
->
-> TIME_WAIT			__<- FIN N__			close  LIST_ACK
->
-> __↑__				__ACK N+1 ->__		CLOSED
+| 客户||服务器|
+| :--:|:--:|:--:|
+| close FIN_WAIT_1主动关闭|__FIN M ->__ |CLOSE_WAIT被动关闭 |
+| FIN_WAIT_2|__<- ACK M+1__ |read返回0  __↑__|
+|TIME_WAIT|__<- FIN N__|close  LIST_ACK|
+|__↑__|__ACK N+1 ->__|CLOSED|
 
 ### TIME_WAIT状态
 
 执行主动关闭的那端经历这个状态，停留持续时间是最长分节生命期（MSL）的两倍，也称2MSL
 
-存在的理由： 
+存在的理由：
 
 1. 可靠地实现TCP全双工连接的终止
 2. 允许老的重复分节在网络中消逝
 
-
-
 ### TCP状态转换图
 
 ![TCP状态转换图](/home/coffee/Book/Unp/传输层/img/TCP状态转换图.jpg)
-
