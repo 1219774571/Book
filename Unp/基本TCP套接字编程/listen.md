@@ -1,6 +1,4 @@
-## listen函数
-
------
+# listen函数
 
 listen仅由TCP服务器调用
 
@@ -10,11 +8,10 @@ listen仅由TCP服务器调用
 
 ```c
 #include <sys/socket.h>
-int listen(int sockfd, int backlog);	//返回：成功0，出错-1
+int listen(int sockfd, int backlog); //返回：成功0，出错-1
 ```
 
-#### 内核为监听套接字维护两个队列
+## 内核为监听套接字维护两个队列
 
 1. 未完成连接队列：客户到达服务器，服务器正在处理其他相应的TCP三路握手。这些套接字处于__SYN_RCVD__状态
 2. 已完成连接队列：完成TCP三路握手，这些套接字处于__ESTABLISHED__状态
-

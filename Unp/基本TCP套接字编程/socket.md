@@ -1,12 +1,10 @@
-## socket函数
-
------
+# socket函数
 
 网络I/O一个进程必须做的第一件事就是调用socket函数
 
 ````c
 #include <sys/socket.h>
-int socket(int family, int type, int protocol);	//返回：成则非负描述符，出错则-1
+int socket(int family, int type, int protocol); //返回：成则非负描述符，出错则-1
 ````
 
 > family指明协议族，type指明套接字类型，protocol应设为某个协议类型常值，设为0选择系统默认值
@@ -32,4 +30,3 @@ int socket(int family, int type, int protocol);	//返回：成则非负描述符
 > > | IPPROTO_UDP | UDP传输协议 |
 > > | IPPROTO_SCTP | SCTP传输协议 |
 > >
-

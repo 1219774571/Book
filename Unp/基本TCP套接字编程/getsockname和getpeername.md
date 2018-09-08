@@ -1,4 +1,4 @@
-## getsockname和getpeername函数
+# getsockname和getpeername函数
 
 这两个函数返回与套接字关联的本地协议地址(getsockname)，或者返回与某个套接字关联的外地地址(getpeername)
 
@@ -16,4 +16,3 @@ int getpeername(int sockfd, struct sockaddr *peeraddr, socklen_t *addrlen);
 > - getsockname可用于获取某些套接字的地址族
 > - 在一个以通配IP地址调用bind的TCP__服务器__上，accept成功返回后，getsockname就可以用于返回由内核赋予该连接的本地IP地址
 > - 当一个服务器是由调用个accept的某个进程通过调用exec执行程序时，它能够__获取客户身份的唯一途径__便是调用getpeername
-
