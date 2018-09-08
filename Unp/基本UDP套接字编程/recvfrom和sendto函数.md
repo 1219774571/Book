@@ -5,9 +5,9 @@ TCP和UDP这两个传输层之间的差别：UDP是无连接不可靠的数据�
 ```c
 #include <sys/socket.h>
 ssize_t recvfrom(int sockfd, void *buff, size_t nbytes, int flags,
-                 struct sockaddr *from, socklen_t *addrlen);
+struct sockaddr *from, socklen_t *addrlen);
 ssize_t sendto(int sockfd, const void *buff, size_t nbytes, int flags,
-              struct sockaddr * to, socklen_t addrlen);
+struct sockaddr * to, socklen_t addrlen);
 //均返回：若成功则为读或写的字节数，出错则为-1
 ```
 
