@@ -9,8 +9,8 @@
 
 每个信号都有一个与之关联的处置，也称行为
 
-> 1. 我们可以提供一个函数，只要有特定信号发生它就被调用。函数叫信号处理函数，行为叫捕获信号。__SIGKILL__和__SIGSTOP__信号是不能捕获的。函数原型为: void handler(int signo)
-> 2. 我们可以把某个信号的处置决定为SIG_IGN来**忽略**它，__SIGKILL__和__SIGSTOP__信号是不能忽略的
+> 1. 我们可以提供一个函数，只要有特定信号发生它就被调用。函数叫信号处理函数，行为叫捕获信号。**SIGKILL**和**SIGSTOP**信号是不能捕获的。函数原型为: void handler(int signo)
+> 2. 我们可以把某个信号的处置决定为SIG_IGN来**忽略**它，**SIGKILL**和**SIGSTOP**信号是不能忽略的
 > 3. 我们可以把某个信号的处置决定为SIG_DFL来启用它的默认处置
 
 ## signal函数
@@ -27,7 +27,7 @@ int sigaction(int sig, const struct sigaction *restrict act, struct sigaction *r
 
 > - 一旦安装了信号处理函数，它便一直安装着
 > - 在一个信号处理函数运行期间，正被递交的信号是阻塞的
-> - 如果一个信号在被阻塞期间产生了一次或多次，那么该信号被解阻塞之后__通常只递交一次__，也就是说Unix信号默认是不排队的
+> - 如果一个信号在被阻塞期间产生了一次或多次，那么该信号被解阻塞之后**通常只递交一次**，也就是说Unix信号默认是不排队的
 > - 利用sigprocmask函数选择性地阻塞或接阻塞一组信号是可能的
 
 ### 处理SIGCHLD信号
@@ -38,7 +38,7 @@ int sigaction(int sig, const struct sigaction *restrict act, struct sigaction *r
 
 适用于慢系统调用的基本规则
 
-> 当阻塞于某个慢系统调用的一个进程捕获某个信号且相应信号处理函数返回时，该系统调用可能返回一个__EINTR错误__
+> 当阻塞于某个慢系统调用的一个进程捕获某个信号且相应信号处理函数返回时，该系统调用可能返回一个**EINTR错误**
 
 ### wait和waitpid函数
 
