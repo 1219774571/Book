@@ -1,6 +1,6 @@
 # IPv4套接字选项
 
-这些套接字选项由IPv4处理，它们的级别（即getsockopt和setsockopt函数的第二个参数）为__IPPROTO_IP__
+这些套接字选项由IPv4处理，它们的级别（即getsockopt和setsockopt函数的第二个参数）为**IPPROTO_IP**
 
 ## IP_HDRINCL
 

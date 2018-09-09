@@ -1,7 +1,5 @@
 # TCP套接字选项
 
------
-
 TCP有两个套接字选项，它们的级别（即getsockopt和setsockopt函数的第二个参数）为**IPPROTO_TCP**
 
 ## TCP_MAXSEG
