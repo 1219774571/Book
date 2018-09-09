@@ -24,4 +24,3 @@ gethostbyname与我们介绍过的其他套接字函数的不同之处在于：�
 > - NO_DATA(等同于NO_ADDRESS)
 
 NO_DATA表示指定的名字有效，但是它没有A记录。只有MX几率的主机名就是这样的一个例子
-
