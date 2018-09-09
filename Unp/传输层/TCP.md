@@ -1,6 +1,6 @@
 # TCP是一个复杂、可靠的字节流协议
 
-> 面向连接的协议，它提供可靠的全双工__字节流__，关心确认、超时、重传之类的细节
+> 面向连接的协议，它提供可靠的全双工**字节流**，关心确认、超时、重传之类的细节
 
 ## TCP提供流量控制
 
@@ -12,8 +12,8 @@
 
 ### 三路握手
 
-> 1. 服务器准备接受外来的连接，通常通过调用socket、bind和listen完成__被动打开__状态
-> 2. 客户端调用connect发起__主动打开__，客户TCP发送SYN（同步）分节，告诉服务器客户发送的数据的*初始序列号*
+> 1. 服务器准备接受外来的连接，通常通过调用socket、bind和listen完成**被动打开**状态
+> 2. 客户端调用connect发起**主动打开**，客户TCP发送SYN（同步）分节，告诉服务器客户发送的数据的*初始序列号*
 > 3. 服务器确认（ACK）客户的SYN，同时发送自己的一个SYN分节，它含有同一连接的*初始序列号*
 > 4. 客户必须确认服务器的SYN
 
@@ -22,16 +22,16 @@
 |客户   |        | 服务器|
 | :----:| :----:| :-----:|
 |socket||socket，bind，listen（被动打开）LISTEN|
-| connect（阻塞）主动打开SYN_SENT|__SYN j  ->↓__  |accept（阻塞）|
-|ESTABLISHED|__<- SYN K， ACK j+1__ |SYN_RCVD|
-|connect返回|__ACK K+1  ->__|ESTABLISHED accept返回read（阻塞）|
+| connect（阻塞）主动打开SYN_SENT|**SYN j  ->↓**  |accept（阻塞）|
+|ESTABLISHED|**<- SYN K， ACK j+1** |SYN_RCVD|
+|connect返回|**ACK K+1  ->**|ESTABLISHED accept返回read（阻塞）|
 
 高带宽或长延迟的网络称为“长胖管道”
 
 #### TCP连接终止
 
-> 1. 调用close__主动关闭__，该端TCP发送一个FIN的分节，表示数据发送完毕
-> 2. 接收到FIN的对端执行__被动关闭__，需要TCP*确认*（发送个ACK），它的接收也作为一个文件结束符传递给接收端数据之后
+> 1. 调用close**主动关闭**，该端TCP发送一个FIN的分节，表示数据发送完毕
+> 2. 接收到FIN的对端执行**被动关闭**，需要TCP*确认*（发送个ACK），它的接收也作为一个文件结束符传递给接收端数据之后
 > 3. 接收到文件描述符后调用close关闭套接字，这会导致它的TCP也发送一个FIN
 > 4. 接收到FIN的原发送端TCP*确认*（发送个ACK）这个FIN
 
@@ -43,10 +43,10 @@
 
 | 客户||服务器|
 | :--:|:--:|:--:|
-| close FIN_WAIT_1主动关闭|__FIN M ->__ |CLOSE_WAIT被动关闭 |
-| FIN_WAIT_2|__<- ACK M+1__ |read返回0  __↑__|
-|TIME_WAIT|__<- FIN N__|close  LIST_ACK|
-|__↑__|__ACK N+1 ->__|CLOSED|
+| close FIN_WAIT_1主动关闭|**FIN M ->** |CLOSE_WAIT被动关闭 |
+| FIN_WAIT_2|**<- ACK M+1** |read返回0  **↑**|
+|TIME_WAIT|**<- FIN N**|close  LIST_ACK|
+|**↑**|**ACK N+1 ->**|CLOSED|
 
 ### TIME_WAIT状态
 
