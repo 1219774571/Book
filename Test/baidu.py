@@ -5,66 +5,73 @@
 
 import getopt
 import hashlib
+import multiprocessing
 import os
 import re
+import signal
 import sys
-from multiprocessing.pool import Pool
 from urllib.parse import urlencode
 import requests
 from requests import RequestException
 
-
 headers = {
-    'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36',
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36',
     'Connection': 'keep-alive',
     'Referer': ''
-    }
+}
 args = {}
 default_path = os.getcwd() + '/images'
-
-
-def get_url_page(num):
-    name = args['i']
-    data = {
+data = {
         'tn': 'resultjson_com',
         'ipn': 'rj',
         'ct': '201326592',
         'fp': 'result',
-        'queryWord': name,
+        'queryWord': '',
         'lm': '-1',
         'ie': 'utf-8',
         'oe': 'utf-8',
         'st': '-1',
         'ic': '0',
-        'word': name,
-        'pn': num,
+        'word': '',
+        'pn': 0,
         'rn': '30'
     }
-    return 'http://image.baidu.com/search/acjson?' + urlencode(data)
-
-
-def get_one_page(url):
-    name = args['i']
-    index_url = {
+index_url = {
         'tn': 'baiduimage',
         'ct': '201326592',
         'lm': -1,
         'cl': 2,
         'ie': 'gb18030',
-        'word': name,
+        'word': '',
         'fr': 'ala',
         'ala': 1,
         'alatpl': 'others',
         'pos': 0
     }
-    index = 'http://image.baidu.com/search/index?' + urlencode(index_url)
+index = 'http://image.baidu.com/search/index?'
+
+
+def src():
+    data['queryWord'] = args['i']
+    data['word'] = args['i']
+    index_url['word'] = args['i']
+
+
+def get_url_page(num):
+    data['pn'] = num
+    return 'http://image.baidu.com/search/acjson?' + urlencode(data)
+
+
+def get_one_page(url):
     try:
-        requests.get(index, headers=headers)
+        print('获取图片源')
+        requests.get(index, headers=headers, params=index_url)
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
+            print('获取完成')
             return response.json()
     except RequestException:
-        print('请求出现异常')
+        print('请求异常')
         return
     return
 
@@ -112,13 +119,13 @@ def download_img(url):
 
 def save_image(img, url):
     path = parse_path()
-    path = '{0}/{1}.{2}'. format(path, hashlib.md5(url.encode('utf-8')).hexdigest(), 'jpg')
+    path = '{0}/{1}.{2}'.format(path, hashlib.md5(url.encode('utf-8')).hexdigest(), 'jpg')
     if not os.path.exists(path):
         with open(path, 'wb') as f:
             f.write(img)
             print('图片', path, '下载完成')
     else:
-        print('图片', path, '已存在, 自动跳过')
+        print('图片', path, '已存在,自动跳过')
 
 
 def parse_args():
@@ -130,7 +137,7 @@ def parse_args():
     if 'n' not in args.keys():
         args['n'] = 1
     if 'p' not in args.keys():
-        args['p'] = 4
+        args['p'] = multiprocessing.cpu_count()
 
 
 def show_args():
@@ -138,7 +145,7 @@ def show_args():
         print("-n 爬取次数 默认=1")
         print("-i 爬取图片名字")
         print("-o 输出目录，无则下载到当前目录images,无images则创建")
-        print("-p 指定进程数，默认=4")
+        print("-p 指定线程数，默认=cpu核数")
         sys.exit(1)
 
 
@@ -149,6 +156,7 @@ def get_args():
         print('参数错误')
         sys.exit(1)
     for option in opts:
+        print(option)
         try:
             if option[0] == '-n':
                 args['n'] = int(option[1])
@@ -173,12 +181,27 @@ def main(offset):
     if not url:
         return
     for image in url:
-        if image:
-            download_img(image)
+        download_img(image)
+
+
+def init_worker():
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+
+def start():
+    s = [30 * i for i in range(args['n'])]
+    for offset in s:
+        main(offset)
 
 
 if __name__ == '__main__':
     parse_args()
-    s = [30*i for i in range(args['n'])]
-    pool = Pool(processes=args['p'])
-    pool.map(main, s)
+    src()
+    pool = multiprocessing.Pool(args['p'], init_worker)
+    try:
+        pool.apply_async(start)
+        pool.close()
+        pool.join()
+    except KeyboardInterrupt:
+        pool.terminate()
+        pool.join()
