@@ -1,7 +1,7 @@
 # 作者: coffee
 # 时间: 2018年11月04日05:28:23
 # 脚本: 爬取百度图片的爬虫
-# 版本: V1.1
+# 版本: V1.2
 
 import getopt
 import hashlib
@@ -56,9 +56,9 @@ def get_one_page(url):
         'alatpl': 'others',
         'pos': 0
     }
-    index = 'http://image.baidu.com/search/index?' + urlencode(index_url)
+    #index = 'http://image.baidu.com/search/index?' + urlencode(index_url)
     try:
-        requests.get(index, headers=headers)
+        #requests.get(index, headers=headers)
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             return response.json()
@@ -70,11 +70,29 @@ def get_one_page(url):
 
 def parse_one_page(html):
     img = []
-    for i in html['data']:
-        if 'hoverURL' in i:
-            if re.match('http(.*?)jpg', i['hoverURL'], re.S):
-                img.append(i['hoverURL'])
+    try:
+        for i in html['data']:
+            if 'hoverURL' in i:
+                if re.match('http(.*?)jpg|png', i['middleURL'], re.S):
+                    img.append(i['middleURL'])
+    except TypeError:
+        print('此处无源，换线重来')
+        return
     return img
+
+
+def parse_path():
+    if 'o' not in args.keys():
+        if not os.path.isdir(os.getcwd() + '/images'):
+            os.mkdir(os.getcwd() + '/images', 0o755)
+        return os.getcwd() + '/images'
+    else:
+        if not os.path.isdir(args['o']):
+            try:
+                os.mkdir(args['o'], 0o755)
+            except FileNotFoundError:
+                os.makedirs(args['o'], 0o755)
+        return args['o']
 
 
 def download_img(url):
@@ -85,15 +103,8 @@ def download_img(url):
         return
     if response.status_code == 200:
         save_image(response.content, url)
-
-
-def parse_path():
-    if 'o' not in args.keys():
-        if not os.path.isdir(os.getcwd() + '/images'):
-            os.mkdir(os.getcwd() + '/images', 0o755)
-        return os.getcwd() + '/images'
     else:
-        return args['o']
+        print('文件无法下载，状态:', response.status_code)
 
 
 def save_image(img, url):
@@ -103,7 +114,9 @@ def save_image(img, url):
         with open(path, 'wb') as f:
             f.write(img)
             f.close()
-            print('此图片', url, '下载完成')
+            print('图片', url, '下载完成')
+    else:
+        print(path, '图片已存在, 自动跳过')
 
 
 def main(offset):
@@ -111,18 +124,44 @@ def main(offset):
     print("解析url为", url)
     response = get_one_page(url)
     url = parse_one_page(response)
+    if not url:
+        return
+    print('解析完成,开始下载')
     for image in url:
         if image:
             download_img(image)
+    print('当前页面下载结束')
 
 
 def parse_args():
+    show_args()
+    get_args()
+    if 'i' not in args.keys():
+        print("图片名是必须的")
+        sys.exit(1)
+    try:
+        if not args['p'].isdigit() or not args['n'].isdigit():
+            print('指定值必须是数字,当前-p为:', args['p'], '-n为', args['n'])
+            sys.exit(1)
+    except KeyError:
+        pass
+    if 'n' not in args.keys():
+        args['n'] = 1
+    if 'p' not in args.keys():
+        args['p'] = 4
+
+
+def show_args():
     if len(sys.argv) < 2:
-        print("-n number")
+        print("-n 爬取次数 默认=1")
         print("-i 爬取图片名字")
-        print("-o 输出目录，无则下载到当前目录images")
-        sys.exit(2)
-    opts, arg = getopt.getopt(sys.argv[1:], "n:i:o:")
+        print("-o 输出目录，无则下载到当前目录images,无images则创建")
+        print("-p 指定进程数，默认=4")
+        sys.exit(1)
+
+
+def get_args():
+    opts, arg = getopt.getopt(sys.argv[1:], "n:i:o:p:")
     for option in opts:
         if option[0] == '-n':
             args['n'] = option[1]
@@ -130,17 +169,21 @@ def parse_args():
             args['i'] = option[1]
         elif option[0] == '-o':
             args['o'] = option[1]
+        elif option[0] == '-p':
+            args['p'] = option[1]
         else:
-            print("错误参数", option[0])
-    if 'n' not in args.keys() or 'i' not in args.keys():
-        print("数值和图片名是必须的")
-        sys.exit(3)
+            print('异常竟然没处理，看来get_args方法出现问题了')
+            sys.exit(1)
 
 
 if __name__ == '__main__':
     parse_args()
-    s = [30*i for i in range(int(args['n']))]
-    pool = Pool()
+    try:
+            s = [30*i for i in range(int(args['n']))]
+    except ValueError:
+        print('-n 指定数值错误')
+        sys.exit(2)
+    pool = Pool(processes=int(args['p']))
     if 'o' in args.keys():
         pool.map(main, s)
     else:
