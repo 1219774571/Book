@@ -20,6 +20,7 @@ headers = {
     'Referer': ''
     }
 args = {}
+default_path = os.getcwd() + '/images'
 
 
 def get_url_page(num):
@@ -56,14 +57,14 @@ def get_one_page(url):
         'alatpl': 'others',
         'pos': 0
     }
-    #index = 'http://image.baidu.com/search/index?' + urlencode(index_url)
+    index = 'http://image.baidu.com/search/index?' + urlencode(index_url)
     try:
-        #requests.get(index, headers=headers)
+        requests.get(index, headers=headers)
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             return response.json()
     except RequestException:
-        print('请求出现异常', response.status_code)
+        print('请求出现异常')
         return
     return
 
@@ -83,12 +84,14 @@ def parse_one_page(html):
 
 def parse_path():
     if 'o' not in args.keys():
-        if not os.path.isdir(os.getcwd() + '/images'):
-            os.mkdir(os.getcwd() + '/images', 0o755)
-        return os.getcwd() + '/images'
+        if not os.path.isdir(default_path):
+            print('创建文件夹路径为', default_path)
+            os.mkdir(default_path, 0o755)
+        return default_path
     else:
         if not os.path.isdir(args['o']):
             try:
+                print('创建指定文件夹路径为', args['o'])
                 os.mkdir(args['o'], 0o755)
             except FileNotFoundError:
                 os.makedirs(args['o'], 0o755)
@@ -99,7 +102,7 @@ def download_img(url):
     try:
         response = requests.get(url, stream=True, headers=headers)
     except RequestException:
-        print("下载错误", response.status_code)
+        print("下载错误")
         return
     if response.status_code == 200:
         save_image(response.content, url)
@@ -113,24 +116,9 @@ def save_image(img, url):
     if not os.path.exists(path):
         with open(path, 'wb') as f:
             f.write(img)
-            f.close()
-            print('图片', url, '下载完成')
+            print('图片', path, '下载完成')
     else:
-        print(path, '图片已存在, 自动跳过')
-
-
-def main(offset):
-    url = get_url_page(offset)
-    print("解析url为", url)
-    response = get_one_page(url)
-    url = parse_one_page(response)
-    if not url:
-        return
-    print('解析完成,开始下载')
-    for image in url:
-        if image:
-            download_img(image)
-    print('当前页面下载结束')
+        print('图片', path, '已存在, 自动跳过')
 
 
 def parse_args():
@@ -139,12 +127,6 @@ def parse_args():
     if 'i' not in args.keys():
         print("图片名是必须的")
         sys.exit(1)
-    try:
-        if not args['p'].isdigit() or not args['n'].isdigit():
-            print('指定值必须是数字,当前-p为:', args['p'], '-n为', args['n'])
-            sys.exit(1)
-    except KeyError:
-        pass
     if 'n' not in args.keys():
         args['n'] = 1
     if 'p' not in args.keys():
@@ -161,30 +143,42 @@ def show_args():
 
 
 def get_args():
-    opts, arg = getopt.getopt(sys.argv[1:], "n:i:o:p:")
+    try:
+        opts, arg = getopt.getopt(sys.argv[1:], "n:i:o:p:")
+    except getopt.GetoptError:
+        print('参数错误')
+        sys.exit(1)
     for option in opts:
-        if option[0] == '-n':
-            args['n'] = option[1]
-        elif option[0] == '-i':
-            args['i'] = option[1]
-        elif option[0] == '-o':
-            args['o'] = option[1]
-        elif option[0] == '-p':
-            args['p'] = option[1]
-        else:
-            print('异常竟然没处理，看来get_args方法出现问题了')
+        try:
+            if option[0] == '-n':
+                args['n'] = int(option[1])
+            elif option[0] == '-p':
+                args['p'] = int(option[1])
+            elif option[0] == '-i':
+                args['i'] = option[1]
+            elif option[0] == '-o':
+                args['o'] = option[1]
+            else:
+                print('异常竟然没处理，看来get_args方法出现问题了')
+                sys.exit(1)
+        except ValueError:
+            print('数值选项输入为错误')
             sys.exit(1)
+
+
+def main(offset):
+    url = get_url_page(offset)
+    response = get_one_page(url)
+    url = parse_one_page(response)
+    if not url:
+        return
+    for image in url:
+        if image:
+            download_img(image)
 
 
 if __name__ == '__main__':
     parse_args()
-    try:
-            s = [30*i for i in range(int(args['n']))]
-    except ValueError:
-        print('-n 指定数值错误')
-        sys.exit(2)
-    pool = Pool(processes=int(args['p']))
-    if 'o' in args.keys():
-        pool.map(main, s)
-    else:
-        pool.map(main, s)
+    s = [30*i for i in range(args['n'])]
+    pool = Pool(processes=args['p'])
+    pool.map(main, s)
