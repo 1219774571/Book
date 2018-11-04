@@ -156,7 +156,6 @@ def get_args():
         print('参数错误')
         sys.exit(1)
     for option in opts:
-        print(option)
         try:
             if option[0] == '-n':
                 args['n'] = int(option[1])
