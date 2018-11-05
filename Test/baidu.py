@@ -1,91 +1,101 @@
 # 作者: coffee
 # 时间: 2018年11月04日05:28:23
 # 脚本: 爬取百度图片的爬虫
-# 版本: V1.2
+# 版本: V1.8
 
 import getopt
-import hashlib
 import multiprocessing
 import os
-import re
 import signal
 import sys
+from json import JSONDecodeError
 from urllib.parse import urlencode
 import requests
+from bs4 import BeautifulSoup
 from requests import RequestException
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36',
     'Connection': 'keep-alive',
-    'Referer': ''
+    'Referer': '',
 }
 args = {}
 default_path = os.getcwd() + '/images'
 data = {
-        'tn': 'resultjson_com',
-        'ipn': 'rj',
-        'ct': '201326592',
-        'fp': 'result',
-        'queryWord': '',
-        'lm': '-1',
-        'ie': 'utf-8',
-        'oe': 'utf-8',
-        'st': '-1',
-        'ic': '0',
-        'word': '',
-        'pn': 0,
-        'rn': '30'
-    }
+    'tn': 'resultjson_com',
+    'ipn': 'rj',
+    'ct': '201326592',
+    'fp': 'result',
+    'queryWord': '',
+    'lm': '-1',
+    'ie': 'utf-8',
+    'oe': 'utf-8',
+    'st': '-1',
+    'ic': '0',
+    'word': '',
+    'pn': 0,
+    'rn': '30'
+}
 index_url = {
-        'tn': 'baiduimage',
-        'ct': '201326592',
-        'lm': -1,
-        'cl': 2,
-        'ie': 'gb18030',
-        'word': '',
-        'fr': 'ala',
-        'ala': 1,
-        'alatpl': 'others',
-        'pos': 0
-    }
+    'tn': 'baiduimage',
+    'ct': '201326592',
+    'lm': -1,
+    'cl': 2,
+    'ie': 'gb18030',
+    'word': '',
+    'fr': 'ala',
+    'ala': 1,
+    'alatpl': 'others',
+    'pos': 0
+}
+img_url = {
+    'ct': '503316480',
+    'spn': 0,
+    'ie': 'utf-8',
+    'word': '',  # 搜索名
+    'pn': 0,  # 图片数
+    'di': '',  # json
+    'cs': '',
+    'os': ''
+}
 index = 'http://image.baidu.com/search/index?'
+jsonUrl = 'http://image.baidu.com/search/acjson?'
+imgUrl = 'http://image.baidu.com/search/detail?'
 
 
 def src():
     data['queryWord'] = args['i']
     data['word'] = args['i']
     index_url['word'] = args['i']
+    img_url['word'] = args['i']
 
 
-def get_url_page(num):
-    data['pn'] = num
-    return 'http://image.baidu.com/search/acjson?' + urlencode(data)
-
-
-def get_one_page(url):
+def get_one_page():
     try:
-        print('获取图片源')
-        requests.get(index, headers=headers, params=index_url)
-        response = requests.get(url, headers=headers)
+        response = requests.get(jsonUrl, headers=headers, params=data)
         if response.status_code == 200:
-            print('获取完成')
             return response.json()
+        else:
+            print('获取页面失败，状态:', response.status_code)
+            return None
     except RequestException:
         print('请求异常')
-        return
-    return
+        return None
+    except JSONDecodeError:
+        print('json解析失败')
+        return None
 
 
 def parse_one_page(html):
     img = []
-    try:
-        for i in html['data']:
-            if 'hoverURL' in i:
-                if re.match('http(.*?)jpg|png', i['middleURL'], re.S):
-                    img.append(i['middleURL'])
-    except TypeError:
-        print('此处无源，换线重来')
-        return
+    for i in html['data']:
+        if 'di' in i:
+            img_url['di'] = i['di']
+        if 'cs' in i:
+            img_url['cs'] = i['cs']
+        if 'os' in i:
+            img_url['os'] = i['os']
+        img.append(imgUrl + urlencode(img_url) + '&tn=baiduimagedetail&gsm=0&rpstart=0&rpnum=0&islist=&querylist=')
     return img
 
 
@@ -109,21 +119,21 @@ def download_img(url):
     try:
         response = requests.get(url, stream=True, headers=headers)
     except RequestException:
-        print("下载错误")
-        return
+        print("访问下载连接失败")
+        return None
     if response.status_code == 200:
-        save_image(response.content, url)
+        save_image(response, url.split('/')[-1])
     else:
         print('文件无法下载，状态:', response.status_code)
 
 
-def save_image(img, url):
+def save_image(img, name):
     path = parse_path()
-    path = '{0}/{1}.{2}'.format(path, hashlib.md5(url.encode('utf-8')).hexdigest(), 'jpg')
+    path = '{0}/{1}'.format(path, name)
     if not os.path.exists(path):
         with open(path, 'wb') as f:
-            f.write(img)
-            print('图片', path, '下载完成')
+            f.write(img.content)
+        print('图片', path, '下载完成')
     else:
         print('图片', path, '已存在,自动跳过')
 
@@ -146,7 +156,7 @@ def show_args():
         print("-i 爬取图片名字")
         print("-o 输出目录，无则下载到当前目录images,无images则创建")
         print("-p 指定线程数，默认=cpu核数")
-        sys.exit(1)
+        sys.exit(0)
 
 
 def get_args():
@@ -173,14 +183,28 @@ def get_args():
             sys.exit(1)
 
 
-def main(offset):
-    url = get_url_page(offset)
-    response = get_one_page(url)
+def parse_image_url(url):
+    response = requests.get(url, headers=headers)
+    html = BeautifulSoup(response.text, 'lxml')
+    image_url = html.select('#hdFirstImgObj')
+    if image_url:
+        return image_url[0]['src']
+    else:
+        print('获取图片url失败,状态', response.status_code)
+        return None
+
+
+def main():
+    response = get_one_page()
+    if not response:
+        return None
     url = parse_one_page(response)
     if not url:
-        return
+        return None
     for image in url:
-        download_img(image)
+        image_url = parse_image_url(image)
+        if image_url:
+            download_img(image_url)
 
 
 def init_worker():
@@ -188,17 +212,20 @@ def init_worker():
 
 
 def start():
-    s = [30 * i for i in range(args['n'])]
-    for offset in s:
-        main(offset)
+    for offset in range(args['n']):
+        print('第', offset + 1, '轮')
+        data['pn'] = offset * 30
+        img_url['pn'] = offset
+        main()
 
 
 if __name__ == '__main__':
     parse_args()
     src()
+    requests.get(index, headers=headers, params=index_url)
     pool = multiprocessing.Pool(args['p'], init_worker)
     try:
-        pool.apply_async(start)
+        pool.apply_async(start())
         pool.close()
         pool.join()
     except KeyboardInterrupt:
